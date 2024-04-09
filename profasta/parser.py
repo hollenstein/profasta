@@ -93,8 +93,6 @@ class DefaultParser:
     first whitespace-separated word of the header. The rest of the header is stored
     in the "description" field of the `header_fields` dictionary, which might be an
     empty string.
-
-    The `write` method returns the original `header` string from the parsed_header.
     """
 
     @classmethod
