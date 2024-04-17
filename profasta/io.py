@@ -60,7 +60,7 @@ def parse_fasta(file_object: IO[str]) -> Generator[FastaRecord, None, None]:
     for block in fasta_text.split("\n>")[1:]:
         lines = block.split("\n")
         header = lines[0].strip()
-        sequence = "".join(lines[1:]).replace(" ", "")
+        sequence = ("".join(lines[1:]).replace(" ", "").rstrip("*")).upper()
         yield FastaRecord(header, sequence)
 
 
