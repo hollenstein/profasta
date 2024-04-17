@@ -4,13 +4,22 @@ import pytest
 import profasta.io
 
 
-def test_parse_fasta_file():
-    file_buffer = io.StringIO(f">H1\nMKKK\n>H2\nMAAA")
+@pytest.mark.parametrize(
+    "fasta_content, expected_header, expected_sequence",
+    [
+        (f">H1\nMKKK\n>H2\nMAAA", "H1", "MKKK"),
+        (f">H1\nMKKK\nRRR", "H1", "MKKKRRR"),
+        (f">H1\nMKK K\nRR R", "H1", "MKKKRRR"),
+        (f">H1\nMKKK\nRRR*", "H1", "MKKKRRR"),
+    ],
+)
+def test_parse_fasta_file(fasta_content, expected_header, expected_sequence):
+    file_buffer = io.StringIO(fasta_content)
     fasta_parser = profasta.io.parse_fasta(file_buffer)
     record = next(fasta_parser)
 
-    assert record.header == "H1"
-    assert record.sequence == "MKKK"
+    assert record.header == expected_header
+    assert record.sequence == expected_sequence
 
 
 def test_write_fasta_file():
