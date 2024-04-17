@@ -46,6 +46,8 @@ def parse_fasta(file_object: IO[str]) -> Generator[FastaRecord, None, None]:
     Lines starting with ">" are header lines, all others are sequence lines.
     Each header line is followed by one or multiple sequence lines. Multiple sequence
     lines are joined by removing new line characters into one single sequence string.
+    Sequence strings are converted to uppercase and spaces and trailing "*" characters
+    are removed.
 
     Args:
         file_object: A file object to parse.
@@ -60,7 +62,7 @@ def parse_fasta(file_object: IO[str]) -> Generator[FastaRecord, None, None]:
     for block in fasta_text.split("\n>")[1:]:
         lines = block.split("\n")
         header = lines[0].strip()
-        sequence = ("".join(lines[1:]).replace(" ", "").rstrip("*")).upper()
+        sequence = "".join(lines[1:]).replace(" ", "").rstrip("*").upper()
         yield FastaRecord(header, sequence)
 
 
