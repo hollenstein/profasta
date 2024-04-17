@@ -1,5 +1,8 @@
 # ProFASTA
 [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
+![Python Version from PEP 621 TOML](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fhollenstein%2Fprofasta%2Fmain%2Fpyproject.toml)
+[![pypi](https://img.shields.io/pypi/v/profasta)](https://pypi.org/project/profasta)
+[![unit-tests](https://github.com/hollenstein/profasta/actions/workflows/python-package.yml/badge.svg?branch=main)](https://github.com/hollenstein/profasta/actions/workflows/python-package.yml)
 
 ## Introduction
 ProFASTA is a Python library for working with FASTA files containing protein records. Unlike other packages, ProFASTA prioritizes simplicity, while aiming to provide a set of useful features required in the field of proteomics based mass spectrometry. 
