@@ -12,11 +12,14 @@ Classes:
 
 from __future__ import annotations
 from dataclasses import dataclass
+import logging
 from pathlib import Path
 from typing import Any, Iterator, Optional, Protocol
 
 from profasta.parser import get_parser, get_writer
 import profasta.io
+
+logger = logging.getLogger(__name__)
 
 
 class AbstractDatabaseEntry(Protocol):
@@ -51,16 +54,21 @@ class ProteinDatabase:
 
     Attributes:
         db: Dictionary mapping protein identifiers to protein entries.
-        imported_fasta_files: List of FASTA files that have been imported into the
+        added_fasta_files: List of FASTA files that have been imported into the
             database.
+        skipped_fasta_entries: Dictionary mapping added FASTA names to lists of FASTA
+            entry headers that could not be parsed by the header parser, and thus were
+            not added to the database.
     """
 
     db: dict[str, AbstractDatabaseEntry]
-    imported_fasta_files: list[str]
+    added_fasta_files: list[str]
+    skipped_fasta_entries: dict[str, list]
 
     def __init__(self):
         self.db = {}
-        self.imported_fasta_files = []
+        self.added_fasta_files = []
+        self.skipped_fasta_entries = {}
 
     def add_fasta(
         self,
@@ -68,6 +76,7 @@ class ProteinDatabase:
         header_parser: str,
         fasta_name: Optional[str] = None,
         overwrite: bool = False,
+        skip_invalid: bool = False,
     ):
         """Add protein entries from a FASTA file to the database.
 
@@ -80,25 +89,50 @@ class ProteinDatabase:
             overwrite: If True, overwrite an existing entry with the same identifier.
                 If False and an entry with the same identifier already exists, a
                 KeyError will be raised.
+            skip_invalid: If True, entries with a non-parsable header are skipped. If
+                False, a ValueError is raised when an entry is encountered which header
+                could not be parsed by the header_parser. Headers of skipped entries are
+                stored in the skipped_fasta_entries attribute.
         """
         fasta_name = fasta_name if fasta_name is not None else Path(path).name
         parser = get_parser(header_parser)
-        protein_entries: list[DatabaseEntry] = []
+        parsed_protein_entries: list[DatabaseEntry] = []
+        skipped_entry_headers: list[str] = []
 
         with open(path, "r") as file:
             for fasta_record in profasta.io.parse_fasta(file):
-                parsed_header = parser.parse(fasta_record.header)
+                try:
+                    parsed_header = parser.parse(fasta_record.header)
+                except ValueError as error:
+                    if skip_invalid:
+                        skipped_entry_headers.append(fasta_record.header)
+                        continue
+                    else:
+                        raise ValueError(
+                            f"FASTA header could not be parsed with the "
+                            f"'{header_parser}' parser: '{fasta_record.header}'"
+                        ) from error
                 protein_entry = DatabaseEntry(
                     parsed_header.identifier,
                     parsed_header.header,
                     fasta_record.sequence,
                     parsed_header.header_fields,
                 )
-                protein_entries.append(protein_entry)
+                parsed_protein_entries.append(protein_entry)
 
-        self.imported_fasta_files.append(fasta_name)
-        for protein_entry in protein_entries:
+        self.added_fasta_files.append(fasta_name)
+        self.skipped_fasta_entries[fasta_name] = skipped_entry_headers
+        for protein_entry in parsed_protein_entries:
             self.add_entry(protein_entry, overwrite)
+
+        if skipped_entry_headers:
+            num_skipped = len(skipped_entry_headers)
+            num_total = num_skipped + len(parsed_protein_entries)
+            logger.warning(
+                f"Skipped {num_skipped}/{num_total} entries while adding "
+                f"'{fasta_name}' to a ProteinDatabase because their headers could not "
+                f"be parsed:"
+            )
 
     def add_entry(self, protein_entry: AbstractDatabaseEntry, overwrite: bool = False):
         """Add a protein entry to the database.
