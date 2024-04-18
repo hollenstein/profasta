@@ -9,9 +9,9 @@ New parsers and writers must be registered via the `register_parser` and
 
 Classes:
     AbstractParsedHeader (Protocol): Interface for representing a parsed FASTA header.
+    AbstractHeaderParser (Protocol): Interface for a FASTA header parser.
+    AbstractHeaderWriter (Protocol): Interface for a FASTA header writer.
     ParsedHeader: Representation of a parsed FASTA header.
-    HeaderParser (Protocol): Interface for a FASTA header parser.
-    HeaderWriter (Protocol): Interface for a FASTA header writer.
     DefaultParser: Default FASTA header parser.
     UniprotParser: Parser for Uniprot FASTA headers.
     UniprotLikeParser: Parser for less strict Uniprot like FASTA headers.
@@ -53,6 +53,24 @@ class AbstractParsedHeader(Protocol):
     header_fields: dict[str, str]
 
 
+class AbstractHeaderParser(Protocol):
+    """Abstract header parser."""
+
+    @classmethod
+    def parse(self, header: str) -> AbstractParsedHeader:
+        """Parse a FASTA header string into a ParsedHeader object."""
+        ...
+
+
+class AbstractHeaderWriter(Protocol):
+    """Abstract header writer."""
+
+    @classmethod
+    def write(self, parsed_header: AbstractParsedHeader) -> str:
+        """Write a FASTA header string from a ParsedHeader object."""
+        ...
+
+
 @dataclass
 class ParsedHeader:
     """Parsed FASTA header.
@@ -66,24 +84,6 @@ class ParsedHeader:
     identifier: str
     header: str
     header_fields: dict[str, str] = field(default_factory=dict)
-
-
-class HeaderParser(Protocol):
-    """Abstract header parser."""
-
-    @classmethod
-    def parse(self, header: str) -> AbstractParsedHeader:
-        """Parse a FASTA header string into a ParsedHeader object."""
-        ...
-
-
-class HeaderWriter(Protocol):
-    """Abstract header writer."""
-
-    @classmethod
-    def write(self, parsed_header: AbstractParsedHeader) -> str:
-        """Write a FASTA header string from a ParsedHeader object."""
-        ...
 
 
 class DefaultParser:
@@ -292,34 +292,34 @@ class UniprotLikeWriter:
         return " ".join(header_entries)
 
 
-def register_parser(name: str, parser: HeaderParser):
+def register_parser(name: str, parser: AbstractHeaderParser):
     """Register a custom parser by name."""
     PARSER_REGISTRY[name] = parser
 
 
-def get_parser(parser_name: str) -> HeaderParser:
+def get_parser(parser_name: str) -> AbstractHeaderParser:
     """Get a registered parser by name."""
     return PARSER_REGISTRY[parser_name]
 
 
-def register_writer(name: str, parser: HeaderWriter):
+def register_writer(name: str, parser: AbstractHeaderWriter):
     """Register a custom writer by name."""
     WRITER_REGISTRY[name] = parser
 
 
-def get_writer(parser_name: str) -> HeaderWriter:
+def get_writer(parser_name: str) -> AbstractHeaderWriter:
     """Get a registered writer by name."""
     return WRITER_REGISTRY[parser_name]
 
 
-PARSER_REGISTRY: dict[str, HeaderParser] = {
+PARSER_REGISTRY: dict[str, AbstractHeaderParser] = {
     "default": DefaultParser,
     "uniprot": UniprotParser,
     "uniprot_like": UniprotLikeParser,
 }
 
 
-WRITER_REGISTRY: dict[str, HeaderWriter] = {
+WRITER_REGISTRY: dict[str, AbstractHeaderWriter] = {
     "default": DefaultWriter,
     "decoy": DecoyWriter,
     "uniprot": UniprotWriter,
