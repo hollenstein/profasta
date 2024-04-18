@@ -58,7 +58,11 @@ class AbstractHeaderParser(Protocol):
 
     @classmethod
     def parse(self, header: str) -> AbstractParsedHeader:
-        """Parse a FASTA header string into a ParsedHeader object."""
+        """Parse a FASTA header string into a ParsedHeader object.
+
+        Raises:
+            ValueError: If the header could not be parsed.
+        """
         ...
 
 
@@ -92,7 +96,8 @@ class DefaultParser:
     The `parse` method returns a ParsedHeader object with the identifier being the
     first whitespace-separated word of the header. The rest of the header is stored
     in the "description" field of the `header_fields` dictionary, which might be an
-    empty string.
+    empty string. This parser is guaranteed to work for any FASTA header string and
+    never fail.
     """
 
     @classmethod
@@ -157,7 +162,11 @@ class UniprotParser:
 
     @classmethod
     def parse(cls, header: str) -> ParsedHeader:
-        """Parse a FASTA header string into a ParsedHeader object."""
+        """Parse a FASTA header string into a ParsedHeader object.
+
+        Raises:
+            ValueError: If the header could not be parsed.
+        """
         match = cls.header_pattern.match(header)
         if match is None:
             raise ValueError(f"Header does not match the UniProt pattern: {header}")
@@ -223,7 +232,11 @@ class UniprotLikeParser:
 
     @classmethod
     def parse(cls, header: str) -> ParsedHeader:
-        """Parse a FASTA header string into a ParsedHeader object."""
+        """Parse a FASTA header string into a ParsedHeader object.
+
+        Raises:
+            ValueError: If the header could not be parsed.
+        """
         split_header = header.split(maxsplit=1)
         try:
             db, _id, entry = split_header[0].split("|")
