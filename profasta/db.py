@@ -81,11 +81,10 @@ class ProteinDatabase:
                 If False and an entry with the same identifier already exists, a
                 KeyError will be raised.
         """
-        if fasta_name is None:
-            fasta_name = Path(path).name
-        self.imported_fasta_files.append(fasta_name)
-
+        fasta_name = fasta_name if fasta_name is not None else Path(path).name
         parser = get_parser(header_parser)
+        protein_entries: list[DatabaseEntry] = []
+
         with open(path, "r") as file:
             for fasta_record in profasta.io.parse_fasta(file):
                 parsed_header = parser.parse(fasta_record.header)
@@ -95,7 +94,11 @@ class ProteinDatabase:
                     fasta_record.sequence,
                     parsed_header.header_fields,
                 )
-                self.add_entry(protein_entry, overwrite)
+                protein_entries.append(protein_entry)
+
+        self.imported_fasta_files.append(fasta_name)
+        for protein_entry in protein_entries:
+            self.add_entry(protein_entry, overwrite)
 
     def add_entry(self, protein_entry: AbstractDatabaseEntry, overwrite: bool = False):
         """Add a protein entry to the database.
