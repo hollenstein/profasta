@@ -56,7 +56,7 @@ pip uninstall profasta
     - [x] built-in parser for uniprot format
     - [x] allow user defined parser
 - [x] write FASTA file
-    -[x] allow custom FASTA header generation
+    - [x] allow custom FASTA header generation
     
 **Additional features**
 - [x] read multiple FASTA files and write a combined file
@@ -65,3 +65,6 @@ pip uninstall profasta
     - [x] add decoy protein records to an existing FASTA file
 - [ ] validate FASTA file / FASTA records
 
+## Contributors
+
+- Juraj Ahel - [@xeniorn](https://github.com/xeniorn)
