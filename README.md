@@ -24,13 +24,15 @@ The following code snippet shows how to import a FASTA file containing UniProt p
 ```python
 >>> import profasta
 >>> 
->>> fasta_path = "./example_data/uniprot_hsapiens_10entries.fasta"
+>>> fasta_path = "./examples/uniprot_hsapiens_10entries.fasta"
 >>> db = profasta.db.ProteinDatabase()
 >>> db.add_fasta(fasta_path, header_parser="uniprot")
 >>> protein_record = db["O75385"]
 >>> print(protein_record.header_fields["gene_name"])
 ULK1
 ```
+
+For more examples how to use the ProFASTA library please refer to the [code snippets](examples/code_snippets.ipynb) Jupyter notebook.
 
 ## Requirements
 Python >= 3.9
