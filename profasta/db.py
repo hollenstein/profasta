@@ -188,6 +188,15 @@ class ProteinDatabase:
         """Get a protein entry by its identifier or return a default value."""
         return self.db.get(identifier, default)
 
+    def keys(self):
+        return self.db.keys()
+
+    def values(self):
+        return self.db.values()
+
+    def items(self):
+        return self.db.items()
+
     def __getitem__(self, identifier) -> AbstractDatabaseEntry:
         return self.db[identifier]
 
