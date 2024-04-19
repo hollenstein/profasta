@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+
 # C extensions
 *.so
 
@@ -103,6 +104,9 @@ venv.bak/
 
 ### VisualStudioCode ###
 .vscode/
+
+### visual studio ###
+.vs/
 
 # Local History for Visual Studio Code
 .history/

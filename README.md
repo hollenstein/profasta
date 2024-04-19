@@ -1,5 +1,8 @@
 # ProFASTA
 [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
+![Python Version from PEP 621 TOML](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fhollenstein%2Fprofasta%2Fmain%2Fpyproject.toml)
+[![pypi](https://img.shields.io/pypi/v/profasta)](https://pypi.org/project/profasta)
+[![unit-tests](https://github.com/hollenstein/profasta/actions/workflows/python-package.yml/badge.svg?branch=main)](https://github.com/hollenstein/profasta/actions/workflows/python-package.yml)
 
 ## Introduction
 ProFASTA is a Python library for working with FASTA files containing protein records. Unlike other packages, ProFASTA prioritizes simplicity, while aiming to provide a set of useful features required in the field of proteomics based mass spectrometry. 
@@ -21,13 +24,15 @@ The following code snippet shows how to import a FASTA file containing UniProt p
 ```python
 >>> import profasta
 >>> 
->>> fasta_path = "./example_data/uniprot_hsapiens_10entries.fasta"
+>>> fasta_path = "./examples/uniprot_hsapiens_10entries.fasta"
 >>> db = profasta.db.ProteinDatabase()
 >>> db.add_fasta(fasta_path, header_parser="uniprot")
 >>> protein_record = db["O75385"]
 >>> print(protein_record.header_fields["gene_name"])
 ULK1
 ```
+
+For more examples how to use the ProFASTA library please refer to the [code snippets](examples/code_snippets.ipynb) Jupyter notebook.
 
 ## Requirements
 Python >= 3.9
@@ -53,7 +58,7 @@ pip uninstall profasta
     - [x] built-in parser for uniprot format
     - [x] allow user defined parser
 - [x] write FASTA file
-    -[x] allow custom FASTA header generation
+    - [x] allow custom FASTA header generation
     
 **Additional features**
 - [x] read multiple FASTA files and write a combined file
@@ -62,3 +67,6 @@ pip uninstall profasta
     - [x] add decoy protein records to an existing FASTA file
 - [ ] validate FASTA file / FASTA records
 
+## Contributors
+
+- Juraj Ahel - [@xeniorn](https://github.com/xeniorn)

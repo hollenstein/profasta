@@ -1,3 +1,10 @@
+"""Functions for creating decoy databases.
+
+Functions:
+    create_decoy_db: Create a decoy database by reversing the sequences of the input
+        database records.
+"""
+
 from copy import deepcopy
 from profasta.db import ProteinDatabase
 
@@ -20,7 +27,7 @@ def create_decoy_db(
     decoy_db = ProteinDatabase()
     for protein in db:
         decoy_entry = deepcopy(db[protein])
-        decoy_entry.sequence = reverse_sequence(
+        decoy_entry.sequence = _reverse_sequence(
             decoy_entry.sequence,
             keep_nterm=keep_nterm,
             keep_nterm_methionine=keep_nterm_methionine,
@@ -29,7 +36,7 @@ def create_decoy_db(
     return decoy_db
 
 
-def reverse_sequence(
+def _reverse_sequence(
     sequence: str, keep_nterm: bool = False, keep_nterm_methionine: bool = True
 ) -> str:
     """Create a decoy sequence by reversing the input sequence.
