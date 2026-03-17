@@ -63,7 +63,7 @@ class ProteinDatabase:
 
     db: dict[str, AbstractDatabaseEntry]
     added_fasta_files: list[str]
-    skipped_fasta_entries: dict[str, list]
+    skipped_fasta_entries: dict[str, list[str]]
 
     def __init__(self):
         self.db = {}
@@ -128,10 +128,11 @@ class ProteinDatabase:
         if skipped_entry_headers:
             num_skipped = len(skipped_entry_headers)
             num_total = num_skipped + len(parsed_protein_entries)
+            skipped_list = "\n  ".join(skipped_entry_headers)
             logger.warning(
                 f"Skipped {num_skipped}/{num_total} entries while adding "
                 f"'{fasta_name}' to a ProteinDatabase because their headers could not "
-                f"be parsed:"
+                f"be parsed:\n  {skipped_list}"
             )
 
     def add_entry(self, protein_entry: AbstractDatabaseEntry, overwrite: bool = False):
@@ -152,7 +153,7 @@ class ProteinDatabase:
 
     def write_fasta(
         self,
-        path,
+        path: str,
         append: bool = False,
         header_writer: Optional[str] = None,
         line_width: int = 60,

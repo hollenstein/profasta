@@ -7,7 +7,7 @@ Classes:
     FastaRecord: Representation of a protein record in a FASTA file.
 
 Functions:
-    parse_fasta: Parse a FASTA file object and return a list of FastaRecords.
+    parse_fasta: Parse a FASTA file object and yield FastaRecords.
     write_fasta: Write a list of FastaRecords to a file object.
 """
 
@@ -55,14 +55,20 @@ def parse_fasta(file_object: IO[str]) -> Generator[FastaRecord, None, None]:
     Yields:
         Yields FastaRecords.
     """
-    fasta_text = file_object.read()
-    if not fasta_text.startswith("\n"):
-        fasta_text = "\n" + fasta_text
-
-    for block in fasta_text.split("\n>")[1:]:
-        lines = block.split("\n")
-        header = lines[0].strip()
-        sequence = "".join(lines[1:]).replace(" ", "").rstrip("*").upper()
+    header = None
+    sequence_lines: list[str] = []
+    for line in file_object:
+        line = line.rstrip("\n")
+        if line.startswith(">"):
+            if header is not None:
+                sequence = "".join(sequence_lines).replace(" ", "").rstrip("*").upper()
+                yield FastaRecord(header, sequence)
+            header = line[1:].strip()
+            sequence_lines = []
+        else:
+            sequence_lines.append(line)
+    if header is not None:
+        sequence = "".join(sequence_lines).replace(" ", "").rstrip("*").upper()
         yield FastaRecord(header, sequence)
 
 

@@ -15,7 +15,7 @@ class CustomParser:
 
 class CustomWriter:
     @classmethod
-    def write(self, parsed_header):
+    def write(cls, parsed_header):
         return parsed_header.header
 
 
