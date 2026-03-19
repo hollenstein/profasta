@@ -24,14 +24,11 @@ dev = ["pytest"]
 repository = "https://github.com/hollenstein/profasta"
 
 [build-system]
-requires = ["setuptools>=61.0.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.setuptools]
-packages = ["profasta"]
-
-[tool.setuptools.dynamic]
-version = { attr = "profasta.__version__" }
+[tool.hatch.version]
+path = "profasta/__init__.py"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
