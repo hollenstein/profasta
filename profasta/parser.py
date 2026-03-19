@@ -16,8 +16,8 @@ Classes:
     UniprotParser: Parser for Uniprot FASTA headers.
     UniprotLikeParser: Parser for less strict Uniprot like FASTA headers.
     DefaultWriter: Default FASTA header writer.
-    UniprotWriter: Parser for Uniprot FASTA writer.
-    UniprotLikeWriter: Parser for less strict Uniprot like FASTA writer.
+    UniprotWriter: Writer for Uniprot FASTA headers.
+    UniprotLikeWriter: Writer for less strict Uniprot like FASTA headers.
 
 Functions:
     register_parser: Register a custom FASTA header parser by name.
@@ -57,7 +57,7 @@ class AbstractHeaderParser(Protocol):
     """Abstract header parser."""
 
     @classmethod
-    def parse(self, header: str) -> AbstractParsedHeader:
+    def parse(cls, header: str) -> AbstractParsedHeader:
         """Parse a FASTA header string into a ParsedHeader object.
 
         Raises:
@@ -70,7 +70,7 @@ class AbstractHeaderWriter(Protocol):
     """Abstract header writer."""
 
     @classmethod
-    def write(self, parsed_header: AbstractParsedHeader) -> str:
+    def write(cls, parsed_header: AbstractParsedHeader) -> str:
         """Write a FASTA header string from a ParsedHeader object."""
         ...
 
@@ -95,9 +95,9 @@ class DefaultParser:
 
     The `parse` method returns a ParsedHeader object with the identifier being the
     first whitespace-separated word of the header. The rest of the header is stored
-    in the "description" field of the `header_fields` dictionary, which might be an
-    empty string. This parser is guaranteed to work for any FASTA header string and
-    never fail.
+    in the "description" field of the `header_fields` dictionary. If there is no
+    description, the "description" key is absent from `header_fields`. This parser
+    is guaranteed to work for any FASTA header string and never fail.
     """
 
     @classmethod
@@ -315,14 +315,14 @@ def get_parser(parser_name: str) -> AbstractHeaderParser:
     return PARSER_REGISTRY[parser_name]
 
 
-def register_writer(name: str, parser: AbstractHeaderWriter):
+def register_writer(name: str, writer: AbstractHeaderWriter):
     """Register a custom writer by name."""
-    WRITER_REGISTRY[name] = parser
+    WRITER_REGISTRY[name] = writer
 
 
-def get_writer(parser_name: str) -> AbstractHeaderWriter:
+def get_writer(writer_name: str) -> AbstractHeaderWriter:
     """Get a registered writer by name."""
-    return WRITER_REGISTRY[parser_name]
+    return WRITER_REGISTRY[writer_name]
 
 
 PARSER_REGISTRY: dict[str, AbstractHeaderParser] = {

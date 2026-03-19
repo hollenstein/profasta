@@ -7,7 +7,7 @@ Classes:
     FastaRecord: Representation of a protein record in a FASTA file.
 
 Functions:
-    parse_fasta: Parse a FASTA file object and return a list of FastaRecords.
+    parse_fasta: Parse a FASTA file object and yield FastaRecords.
     write_fasta: Write a list of FastaRecords to a file object.
 """
 
