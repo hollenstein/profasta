@@ -1,6 +1,31 @@
-import pytest
-
 import profasta.parser
+
+
+class TestDefaultParser:
+    def test_parse_header_with_description(self):
+        header = "P12345 Some protein description"
+        parsed = profasta.parser.DefaultParser.parse(header)
+        assert parsed.identifier == "P12345"
+        assert parsed.header == header
+        assert parsed.header_fields == {"description": "Some protein description"}
+
+    def test_parse_header_without_description(self):
+        header = "P12345"
+        parsed = profasta.parser.DefaultParser.parse(header)
+        assert parsed.identifier == "P12345"
+        assert parsed.header_fields == {}
+
+
+class TestDefaultWriter:
+    def test_write_returns_original_header(self):
+        header = "P12345 Some protein description"
+        parsed = profasta.parser.ParsedHeader("P12345", header, {})
+        assert profasta.parser.DefaultWriter.write(parsed) == header
+
+    def test_parse_write_roundtrip(self):
+        header = "ACC_001 A multi-word description"
+        parsed = profasta.parser.DefaultParser.parse(header)
+        assert profasta.parser.DefaultWriter.write(parsed) == header
 
 
 class TestUniprotLikeParser:
