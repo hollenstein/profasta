@@ -34,9 +34,9 @@ Constants:
         be retrieved via the `get_writer` function.
 """
 
+import re
 from dataclasses import dataclass, field
 from typing import Protocol
-import re
 
 
 class AbstractParsedHeader(Protocol):
@@ -124,8 +124,17 @@ class DefaultWriter:
 class DecoyWriter:
     """A FASTA header writer for decoy entries.
 
-    The `write` method returns the original `header` string from the parsed_header
-    prefixed with a tag "rev_" to indicate that the entry is a decoy.
+    Prepends a decoy tag to the original header string. This class can be used directly
+    with the default "rev_" tag, or specialized for custom tags using the `with_tag`
+    factory method.
+
+    Example:
+        # Default usage ("rev_")
+        profasta.parser.DecoyWriter.write(parsed_header)
+
+        # Custom usage and registration of the custom writer in the writer registry
+        CustomDecoy = profasta.parser.DecoyWriter.with_tag("decoy_")
+        profasta.parser.register_writer("decoy", CustomDecoy)
     """
 
     decoy_tag: str = "rev_"
@@ -134,6 +143,12 @@ class DecoyWriter:
     def write(cls, parsed_header: AbstractParsedHeader) -> str:
         """Write a FASTA header string from a ParsedHeader object."""
         return f"{cls.decoy_tag}{parsed_header.header}"
+
+    @classmethod
+    def with_tag(cls, decoy_tag: str = "rev_"):
+        """Create a specialized DecoyWriter class with a custom tag."""
+        new_class_name = f"{cls.__name__}_{decoy_tag.rstrip('_')}"
+        return type(new_class_name, (cls,), {"decoy_tag": decoy_tag})
 
 
 class UniprotParser:

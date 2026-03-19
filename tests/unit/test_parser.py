@@ -99,8 +99,35 @@ class TestUniprotLikeParser:
         assert parsed_header.header_fields == expected_fields
 
 
-def test_decoy_writer():
-    header = "sp|O75385|ULK1_HUMAN"
-    parsed_header = profasta.parser.ParsedHeader("", header, {})
-    decoy_header = profasta.parser.DecoyWriter.write(parsed_header)
-    assert decoy_header == "rev_" + header
+class TestDecoyWriter:
+    def test_decoy_tag_added(self):
+        header = "sp|O75385|ULK1_HUMAN"
+        parsed_header = profasta.parser.ParsedHeader("", header, {})
+        decoy_header = profasta.parser.DecoyWriter.write(parsed_header)
+        assert decoy_header == "rev_" + header
+
+    def test_with_custom_tag(self):
+        header = "sp|O75385|ULK1_HUMAN"
+        parsed_header = profasta.parser.ParsedHeader("", header, {})
+        CustomDecoyWriter = profasta.parser.DecoyWriter.with_tag("decoy_")
+        assert CustomDecoyWriter.write(parsed_header) == "decoy_" + header
+
+    def test_init_with_custom_tag_does_not_affect_default_class(self):
+        header = "sp|O75385|ULK1_HUMAN"
+        parsed_header = profasta.parser.ParsedHeader("", header, {})
+        profasta.parser.DecoyWriter.with_tag("decoy_")
+        assert profasta.parser.DecoyWriter.write(parsed_header) == "rev_" + header
+
+
+class TestWriterRegistry:
+    def test_get_builtin_writer(self):
+        assert profasta.parser.get_writer("default") is profasta.parser.DefaultWriter
+
+    def test_register_and_get_custom_writer(self):
+        class CustomWriter:
+            @classmethod
+            def write(cls, parsed_header):
+                return parsed_header.header
+
+        profasta.parser.register_writer("custom_writer", CustomWriter)
+        assert profasta.parser.get_writer("custom_writer") is CustomWriter
