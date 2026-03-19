@@ -1,6 +1,6 @@
-import profasta
 from pathlib import Path
 
+import profasta
 
 FASTA_PATH = Path(__file__).parent / "uniprot_hsapiens_10entries.fasta"
 

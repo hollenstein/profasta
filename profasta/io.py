@@ -12,7 +12,7 @@ Functions:
 """
 
 from dataclasses import dataclass
-from typing import Generator, Iterable, IO, Protocol
+from typing import IO, Generator, Iterable, Protocol
 
 
 class AbstractFastaRecord(Protocol):

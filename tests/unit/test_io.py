@@ -1,4 +1,5 @@
 import io
+
 import pytest
 
 import profasta.io
@@ -7,10 +8,10 @@ import profasta.io
 @pytest.mark.parametrize(
     "fasta_content, expected_header, expected_sequence",
     [
-        (f">H1\nMKKK\n>H2\nMAAA", "H1", "MKKK"),
-        (f">H1\nMKKK\nRRR", "H1", "MKKKRRR"),
-        (f">H1\nMKK K\nRR R", "H1", "MKKKRRR"),
-        (f">H1\nMKKK\nRRR*", "H1", "MKKKRRR"),
+        (">H1\nMKKK\n>H2\nMAAA", "H1", "MKKK"),
+        (">H1\nMKKK\nRRR", "H1", "MKKKRRR"),
+        (">H1\nMKK K\nRR R", "H1", "MKKKRRR"),
+        (">H1\nMKKK\nRRR*", "H1", "MKKKRRR"),
     ],
 )
 def test_parse_fasta_file(fasta_content, expected_header, expected_sequence):

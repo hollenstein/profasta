@@ -6,6 +6,7 @@ Functions:
 """
 
 from copy import deepcopy
+
 from profasta.db import ProteinDatabase
 
 
