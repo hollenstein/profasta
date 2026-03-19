@@ -49,9 +49,14 @@ class ProteinDatabase:
     derived from FASTA files. It allows for importing protein entries from FASTA files,
     adding new entries, and exporting entries back to FASTA format.
 
-    The Python indexing operator `[]` provides access to the protein entries by their
-    identifier. Iterating over the database yields the identifiers of all protein
-    entries.
+    The class implements a dict-like interface:
+    - Access entries by identifier: `db[identifier]`
+    - Safe access with default: `db.get(identifier, default)`
+    - Check membership: `identifier in db`
+    - Iterate over identifiers: `for identifier in db`
+    - Iterate over entries: `db.keys()`, `db.values()`, `db.items()`
+    - Get database size: `len(db)`
+    - Check if non-empty: `bool(db)` or `if db:`
 
     Attributes:
         db: Dictionary mapping protein identifiers to protein entries.
@@ -204,6 +209,10 @@ class ProteinDatabase:
     def items(self):
         return self.db.items()
 
+    def __bool__(self) -> bool:
+        """Return True if the database contains any entries."""
+        return bool(self.db)
+
     def __getitem__(self, identifier) -> AbstractDatabaseEntry:
         return self.db[identifier]
 
@@ -212,3 +221,23 @@ class ProteinDatabase:
 
     def __iter__(self) -> Iterator[str]:
         return iter(self.db)
+
+    def __len__(self) -> int:
+        """Return the number of protein entries in the database."""
+        return len(self.db)
+
+    def __repr__(self) -> str:
+        """Return a string representation of the ProteinDatabase."""
+        num_entries = len(self.db)
+        num_files = len(self.added_fasta_files)
+        total_skipped = sum(
+            len(headers) for headers in self.skipped_fasta_entries.values()
+        )
+
+        parts = [f"entries={num_entries}"]
+        if num_files > 0:
+            parts.append(f"files={num_files}")
+        if total_skipped > 0:
+            parts.append(f"skipped_entries={total_skipped}")
+
+        return "ProteinDatabase(" + ", ".join(parts) + ")"
