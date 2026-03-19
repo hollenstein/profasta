@@ -11,13 +11,14 @@ Classes:
 """
 
 from __future__ import annotations
-from dataclasses import dataclass
+
 import logging
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterator, Optional, Protocol
 
-from profasta.parser import get_parser, get_writer
 import profasta.io
+from profasta.parser import get_parser, get_writer
 
 logger = logging.getLogger(__name__)
 
@@ -143,10 +144,16 @@ class ProteinDatabase:
                 If False and an entry with the same identifier already exists, a
                 KeyError will be raised.
         """
-        if protein_entry.identifier in self.db and not overwrite:
-            raise KeyError(
-                f"Identifier {protein_entry.identifier} already in database."
-            )
+        if protein_entry.identifier in self.db:
+            if overwrite:
+                logger.warning(
+                    f"Overwriting existing entry with identifier "
+                    f"'{protein_entry.identifier}' in ProteinDatabase."
+                )
+            else:
+                raise KeyError(
+                    f"Identifier '{protein_entry.identifier}' already in database."
+                )
 
         self.db[protein_entry.identifier] = protein_entry
 
