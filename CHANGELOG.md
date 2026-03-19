@@ -1,6 +1,39 @@
 # Changelog
 
-----------------------------------------------------------------------------------------
+---
+
+## Version [0.0.6]
+Released: 2026-03-19
+ 
+### Added
+- `ProteinDatabase` now implements dict-like interface with `__len__`, `__bool__`, and `__repr__` methods.
+- `ProteinDatabase.filter()` method for condition-based entry selection.
+- `ProteinDatabase.from_fasta()` convenience constructor that supports loading from multiple FASTA paths.
+- `DecoyWriter` can now be instantiated with a custom decoy tag.
+- `write_decoy_fasta()` function for writing decoy sequences directly to a FASTA file.
+- Added a `validation` module, currently providing the function `find_header_ascii_issues` for FASTA header ASCII checks.
+- Improved parser and writer registry:
+  - Added `list_parsers` and `list_writers` for inspecting the content of the registy.
+  - Added `replace_parser` and `replace_writer` for updating non built-in entries.
+- Warning logged when overwriting existing entries in `ProteinDatabase`.
+- Required and optional header fields are now documented for FASTA header parsers and writers.
+
+### Changed
+- `ProteinDatabase.db` is now a private attribute.
+- Parser and writer registries are now private attributes.
+- Package exports and the public API are now explicitly defined via `__all__`.
+
+### Fixed
+- `ProteinDatabase.add_fasta()` no longer leaves the database in an inconsistent state when duplicate identifiers are encountered.
+
+### Chores
+- (!) Dropped Python 3.9 / 3.10 support.
+- Added 3.13 / 3.14 support.
+- Switched build system from setuptools to hatchling.
+- Switched CI to uv for faster installs; added linting with ruff.
+- Removed nox for local testing.
+
+---
 
 ## Version [0.0.5]
 Released: 2024-04-19
