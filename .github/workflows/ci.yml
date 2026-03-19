@@ -38,5 +38,11 @@ jobs:
       - name: Sync dependencies
         run: uv sync --extra tests
 
+      - name: Install Ruff
+        run: pip install ruff
+
+      - name: Lint (ruff) 
+        run: uv run --python ${{ matrix.python-version }} ruff check .
+
       - name: Test
         run: uv run --python ${{ matrix.python-version }} pytest --tb=short
