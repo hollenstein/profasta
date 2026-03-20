@@ -2,7 +2,7 @@
 
 from . import io, parser
 from .db import DatabaseEntry, ProteinDatabase
-from .decoy import create_decoy_db
+from .decoy import create_decoy_db, write_decoy_fasta
 
 __author__ = "David M. Hollenstein"
 __license__ = "MIT"
@@ -13,4 +13,5 @@ __all__ = [
     "create_decoy_db",
     "parser",
     "io",
+    "write_decoy_fasta",
 ]

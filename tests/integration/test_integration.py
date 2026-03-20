@@ -86,3 +86,29 @@ def test_create_decoy_database(tmp_path):
     for identifier in db:
         assert db[identifier].header == db2[identifier].header
         assert db[identifier].sequence == db2[identifier].sequence[::-1]
+
+
+def test_write_decoy_fasta(tmp_path):
+    decoy_fasta_path = tmp_path / "subdir" / "decoy.fasta"
+    decoy_tag = "DECOY_"
+
+    db = profasta.ProteinDatabase()
+    db.add_fasta(FASTA_PATH, header_parser="default")
+    profasta.decoy.write_decoy_fasta(
+        db,
+        decoy_fasta_path,
+        decoy_tag=decoy_tag,
+        keep_nterm=False,
+        keep_nterm_methionine=False,
+    )
+
+    decoy_records = {}
+    with open(decoy_fasta_path, "r") as file:
+        for record in profasta.io.parse_fasta(file):
+            decoy_records[record.header] = record
+
+    assert len(decoy_records) == len(db)
+    for entry in db.values():
+        expected_header = decoy_tag + entry.header
+        assert expected_header in decoy_records
+        assert decoy_records[expected_header].sequence == entry.sequence[::-1]
