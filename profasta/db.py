@@ -16,7 +16,16 @@ import logging
 import pathlib
 from dataclasses import dataclass
 from os import PathLike
-from typing import Any, ItemsView, Iterator, KeysView, Optional, Protocol, ValuesView
+from typing import (
+    Any,
+    Callable,
+    ItemsView,
+    Iterator,
+    KeysView,
+    Optional,
+    Protocol,
+    ValuesView,
+)
 
 import profasta.io
 from profasta.parser import get_parser, get_writer
@@ -222,6 +231,29 @@ class ProteinDatabase:
                 )
 
         self._db[protein_entry.identifier] = protein_entry
+
+    def filter(
+        self, condition: Callable[[AbstractDatabaseEntry], bool]
+    ) -> "ProteinDatabase":
+        """Return a new ProteinDatabase containing only entries matching a condition.
+
+        Note that the returned database has empty `added_fasta_files` and
+        `skipped_fasta_entries` attributes, as the filtered database is not directly
+        derived from any FASTA files.
+
+        Args:
+            condition: A callable that takes an `AbstractDatabaseEntry` and returns
+                `True` if the entry should be included in the returned database.
+
+        Returns:
+            A new instance of `ProteinDatabase` containing only the entries for which
+            `condition` returns `True`.
+        """
+        new_db = ProteinDatabase()
+        for entry in self._db.values():
+            if condition(entry):
+                new_db.add_entry(entry)
+        return new_db
 
     def write_fasta(
         self,
