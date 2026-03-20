@@ -1,3 +1,5 @@
+import pytest
+
 import profasta.parser
 
 
@@ -119,9 +121,79 @@ class TestDecoyWriter:
         assert profasta.parser.DecoyWriter.write(parsed_header) == "rev_" + header
 
 
+class TestParserRegistry:
+    def test_get_builtin_parser(self):
+        assert profasta.parser.get_parser("default") is profasta.parser.DefaultParser
+
+    def test_get_unknown_parser_raises_key_error(self):
+        with pytest.raises(KeyError, match="unknown_parser"):
+            profasta.parser.get_parser("unknown_parser")
+
+    def test_register_and_get_custom_parser(self):
+        class MyParser:
+            @classmethod
+            def parse(cls, header):
+                return profasta.parser.ParsedHeader(header, header)
+
+        profasta.parser.register_parser("my_parser", MyParser)
+        assert profasta.parser.get_parser("my_parser") is MyParser
+
+    def test_register_builtin_name_raises_value_error(self):
+        with pytest.raises(ValueError, match="built-in"):
+            profasta.parser.register_parser("default", profasta.parser.DefaultParser)
+
+    def test_register_duplicate_name_raises_value_error(self):
+        class AnotherParser:
+            @classmethod
+            def parse(cls, header):
+                return profasta.parser.ParsedHeader(header, header)
+
+        profasta.parser.register_parser("dup_parser", AnotherParser)
+        with pytest.raises(ValueError, match="dup_parser"):
+            profasta.parser.register_parser("dup_parser", AnotherParser)
+
+    def test_replace_parser_updates_registry(self):
+        class ParserV1:
+            @classmethod
+            def parse(cls, header):
+                return profasta.parser.ParsedHeader(header, header)
+
+        class ParserV2:
+            @classmethod
+            def parse(cls, header):
+                return profasta.parser.ParsedHeader(header, header)
+
+        profasta.parser.register_parser("replaceable_parser", ParserV1)
+        profasta.parser.replace_parser("replaceable_parser", ParserV2)
+        assert profasta.parser.get_parser("replaceable_parser") is ParserV2
+
+    def test_replace_builtin_parser_raises_key_error(self):
+        with pytest.raises(KeyError, match="built-in"):
+            profasta.parser.replace_parser("uniprot", profasta.parser.DefaultParser)
+
+    def test_replace_unregistered_parser_raises_key_error(self):
+        with pytest.raises(KeyError, match="nonexistent_parser"):
+            profasta.parser.replace_parser(
+                "nonexistent_parser", profasta.parser.DefaultParser
+            )
+
+    def test_list_parsers_contains_builtins(self):
+        names = profasta.parser.list_parsers()
+        assert "default" in names
+        assert "uniprot" in names
+        assert "uniprot_like" in names
+
+    def test_list_parsers_returns_list(self):
+        assert isinstance(profasta.parser.list_parsers(), list)
+
+
 class TestWriterRegistry:
     def test_get_builtin_writer(self):
         assert profasta.parser.get_writer("default") is profasta.parser.DefaultWriter
+
+    def test_get_unknown_writer_raises_key_error(self):
+        with pytest.raises(KeyError, match="unknown_writer"):
+            profasta.parser.get_writer("unknown_writer")
 
     def test_register_and_get_custom_writer(self):
         class CustomWriter:
@@ -131,3 +203,51 @@ class TestWriterRegistry:
 
         profasta.parser.register_writer("custom_writer", CustomWriter)
         assert profasta.parser.get_writer("custom_writer") is CustomWriter
+
+    def test_register_builtin_name_raises_value_error(self):
+        with pytest.raises(ValueError, match="built-in"):
+            profasta.parser.register_writer("default", profasta.parser.DefaultWriter)
+
+    def test_register_duplicate_name_raises_value_error(self):
+        class AnotherWriter:
+            @classmethod
+            def write(cls, parsed_header):
+                return parsed_header.header
+
+        profasta.parser.register_writer("dup_writer", AnotherWriter)
+        with pytest.raises(ValueError, match="dup_writer"):
+            profasta.parser.register_writer("dup_writer", AnotherWriter)
+
+    def test_replace_writer_updates_registry(self):
+        class WriterV1:
+            @classmethod
+            def write(cls, parsed_header):
+                return parsed_header.header
+
+        class WriterV2:
+            @classmethod
+            def write(cls, parsed_header):
+                return parsed_header.header
+
+        profasta.parser.register_writer("replaceable_writer", WriterV1)
+        profasta.parser.replace_writer("replaceable_writer", WriterV2)
+        assert profasta.parser.get_writer("replaceable_writer") is WriterV2
+
+    def test_replace_builtin_writer_raises_key_error(self):
+        with pytest.raises(KeyError, match="built-in"):
+            profasta.parser.replace_writer("default", profasta.parser.DefaultWriter)
+
+    def test_replace_unregistered_writer_raises_key_error(self):
+        with pytest.raises(KeyError, match="nonexistent_writer"):
+            profasta.parser.replace_writer(
+                "nonexistent_writer", profasta.parser.DefaultWriter
+            )
+
+    def test_list_writers_contains_builtins(self):
+        names = profasta.parser.list_writers()
+        assert "default" in names
+        assert "uniprot" in names
+        assert "uniprot_like" in names
+
+    def test_list_writers_returns_list(self):
+        assert isinstance(profasta.parser.list_writers(), list)

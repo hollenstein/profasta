@@ -22,17 +22,15 @@ Classes:
 Functions:
     register_parser: Register a custom FASTA header parser by name.
     get_parser: Get a registered FASTA header parser by name.
+    replace_parser: Replace a previously registered non-built-in parser.
+    list_parsers: Return the names of all currently registered parsers.
     register_writer: Register a custom FASTA header writer by name.
     get_writer: Get a registered FASTA header writer by name.
-
-Constants:
-    PARSER_REGISTRY: Dictionary mapping parser names to header parser classes. The
-        built-in parsers are registered as "default", "uniprot", "uniprot_like" and can
-        be retrieved via the `get_parser` function.
-    WRITER_REGISTRY: Dictionary mapping writer names to header writer classes. The
-        built-in writers are registered as "default", "uniprot", "uniprot_like" and can
-        be retrieved via the `get_writer` function.
+    replace_writer: Replace a previously registered non-built-in writer.
+    list_writers: Return the names of all currently registered writers.
 """
+
+from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
@@ -320,36 +318,177 @@ class UniprotLikeWriter:
         return " ".join(header_entries)
 
 
-def register_parser(name: str, parser: AbstractHeaderParser):
-    """Register a custom parser by name."""
-    PARSER_REGISTRY[name] = parser
-
-
-def get_parser(parser_name: str) -> AbstractHeaderParser:
-    """Get a registered parser by name."""
-    return PARSER_REGISTRY[parser_name]
-
-
-def register_writer(name: str, writer: AbstractHeaderWriter):
-    """Register a custom writer by name."""
-    WRITER_REGISTRY[name] = writer
-
-
-def get_writer(writer_name: str) -> AbstractHeaderWriter:
-    """Get a registered writer by name."""
-    return WRITER_REGISTRY[writer_name]
-
-
-PARSER_REGISTRY: dict[str, AbstractHeaderParser] = {
+_PARSER_REGISTRY: dict[str, AbstractHeaderParser] = {
     "default": DefaultParser,
     "uniprot": UniprotParser,
     "uniprot_like": UniprotLikeParser,
 }
 
-
-WRITER_REGISTRY: dict[str, AbstractHeaderWriter] = {
+_WRITER_REGISTRY: dict[str, AbstractHeaderWriter] = {
     "default": DefaultWriter,
-    "decoy": DecoyWriter,
     "uniprot": UniprotWriter,
     "uniprot_like": UniprotLikeWriter,
 }
+
+_BUILTIN_PARSERS: frozenset[str] = frozenset({k for k in _PARSER_REGISTRY})
+_BUILTIN_WRITERS: frozenset[str] = frozenset({k for k in _WRITER_REGISTRY})
+
+
+def register_parser(name: str, parser: AbstractHeaderParser) -> None:
+    """Register a custom FASTA header parser by name.
+
+    Args:
+        name: The name to register the parser under. Must not conflict with a built-in
+            parser name or an already registered custom parser name.
+        parser: The parser class to register.
+
+    Raises:
+        ValueError: If `name` is a built-in parser name.
+        ValueError: If a parser is already registered under `name`. Use `replace_parser`
+            to overwrite an existing custom parser.
+    """
+    if name in _BUILTIN_PARSERS:
+        raise ValueError(
+            f"Cannot register '{name}': it is a built-in parser name and cannot be "
+            f"overwritten. Built-in parsers are: {sorted(_BUILTIN_PARSERS)}."
+        )
+    if name in _PARSER_REGISTRY:
+        raise ValueError(
+            f"A parser named '{name}' is already registered. Use replace_parser() "
+            f"to overwrite an existing custom parser."
+        )
+    _PARSER_REGISTRY[name] = parser
+
+
+def get_parser(name: str) -> AbstractHeaderParser:
+    """Get a registered FASTA header parser by name.
+
+    Args:
+        name: The name of the parser to retrieve.
+
+    Returns:
+        The parser class registered under `name`.
+
+    Raises:
+        KeyError: If no parser is registered under `name`.
+    """
+    if name not in _PARSER_REGISTRY:
+        raise KeyError(
+            f"No parser registered under the name '{name}'. "
+            f"Available parsers are: {list(_PARSER_REGISTRY)}."
+        )
+    return _PARSER_REGISTRY[name]
+
+
+def replace_parser(name: str, parser: AbstractHeaderParser) -> None:
+    """Replace a previously registered non-built-in parser.
+
+    Args:
+        name: The name of the custom parser to replace.
+        parser: The new parser class to register under ``name``.
+
+    Raises:
+        KeyError: If `name` refers to a built-in parser, which cannot be replaced.
+        KeyError: If no custom parser is registered under `name`. Use `register_parser`
+            to add a new parser.
+    """
+    if name in _BUILTIN_PARSERS:
+        raise KeyError(
+            f"Cannot replace '{name}': built-in parsers cannot be overwritten. "
+            f"Built-in parsers are: {sorted(_BUILTIN_PARSERS)}."
+        )
+    if name not in _PARSER_REGISTRY:
+        raise KeyError(
+            f"No custom parser registered under the name '{name}'. "
+            f"Use register_parser() to add a new parser."
+        )
+    _PARSER_REGISTRY[name] = parser
+
+
+def list_parsers() -> list[str]:
+    """Return the names of all currently registered parsers.
+
+    Returns:
+        A list of parser names, including both built-in and custom parsers.
+    """
+    return list(_PARSER_REGISTRY)
+
+
+def register_writer(name: str, writer: AbstractHeaderWriter) -> None:
+    """Register a custom FASTA header writer by name.
+
+    Args:
+        name: The name to register the writer under. Must not conflict with a built-in
+            writer name or an already registered custom writer name.
+        writer: The writer class to register.
+
+    Raises:
+        ValueError: If `name` is a built-in writer name.
+        ValueError: If a writer is already registered under `name`. Use `replace_writer`
+            to overwrite an existing custom writer.
+    """
+    if name in _BUILTIN_WRITERS:
+        raise ValueError(
+            f"Cannot register '{name}': it is a built-in writer name and cannot be "
+            f"overwritten. Built-in writers are: {sorted(_BUILTIN_WRITERS)}."
+        )
+    if name in _WRITER_REGISTRY:
+        raise ValueError(
+            f"A writer named '{name}' is already registered. Use replace_writer() "
+            f"to overwrite an existing custom writer."
+        )
+    _WRITER_REGISTRY[name] = writer
+
+
+def get_writer(name: str) -> AbstractHeaderWriter:
+    """Get a registered FASTA header writer by name.
+
+    Args:
+        name: The name of the writer to retrieve.
+
+    Returns:
+        The writer class registered under `name`.
+
+    Raises:
+        KeyError: If no writer is registered under `name`.
+    """
+    if name not in _WRITER_REGISTRY:
+        raise KeyError(
+            f"No writer registered under the name '{name}'. "
+            f"Available writers are: {list(_WRITER_REGISTRY)}."
+        )
+    return _WRITER_REGISTRY[name]
+
+
+def replace_writer(name: str, writer: AbstractHeaderWriter) -> None:
+    """Replace a previously registered non-built-in writer.
+
+    Args:
+        name: The name of the custom writer to replace.
+        writer: The new writer class to register under `name`.
+
+    Raises:
+        KeyError: If `name` refers to a built-in writer, which cannot be replaced.
+        KeyError: If no custom writer is registered under `name`. Use `register_writer`
+            to add a new writer.
+    """
+    if name in _BUILTIN_WRITERS:
+        raise KeyError(
+            f"Cannot replace '{name}': built-in writers cannot be overwritten. "
+            f"Built-in writers are: {sorted(_BUILTIN_WRITERS)}."
+        )
+    if name not in _WRITER_REGISTRY:
+        raise KeyError(
+            f"No custom writer registered under the name '{name}'. "
+            f"Use register_writer() to add a new writer."
+        )
+    _WRITER_REGISTRY[name] = writer
+
+
+def list_writers() -> list[str]:
+    """Return the names of all currently registered writers.
+
+    Returns:
+        A list of writer names, including both built-in and custom writers.
+    """
+    return list(_WRITER_REGISTRY)
