@@ -110,7 +110,8 @@ class DefaultParser:
 class DefaultWriter:
     """Default FASTA header writer.
 
-    The `write` method returns the original `header` string from the parsed_header.
+    Writes the original `header` string from the parsed header directly, without
+    inspecting or requiring any `header_fields`. Compatible with any parsed header.
     """
 
     @classmethod
@@ -122,9 +123,11 @@ class DefaultWriter:
 class DecoyWriter:
     """A FASTA header writer for decoy entries.
 
-    Prepends a decoy tag to the original header string. This class can be used directly
-    with the default "rev_" tag, or specialized for custom tags using the `with_tag`
-    factory method.
+    Prepends a decoy tag to the original `header` string directly, without inspecting
+    or requiring any `header_fields`. Compatible with any parsed header.
+
+    This class can be used directly with the default "rev_" tag, or specialized for
+    custom tags using the `with_tag` factory method.
 
     Example:
         # Default usage ("rev_")
@@ -150,7 +153,24 @@ class DecoyWriter:
 
 
 class UniprotParser:
-    """Uniprot FASTA header parser."""
+    """Parser for UniProt FASTA headers.
+
+    Parses the standard UniProt header format:
+    `db|identifier|entry_name protein_name OS=... OX=... GN=... PE=... SV=...`
+
+    The following `header_fields` keys are always present after parsing:
+        - `db`: Source database (e.g. "sp" or "tr").
+        - `identifier`: UniProt accession number (e.g. "P12345").
+        - `entry_name`: UniProt entry name (e.g. "INS_HUMAN").
+        - `protein_name`: Full protein name.
+
+    The following `header_fields` keys are optional (only present if in the header):
+        - `organism_name`: Organism name (OS field).
+        - `organism_identifier`: NCBI taxonomy ID (OX field).
+        - `gene_name`: Gene name (GN field).
+        - `protein_existence`: Protein existence level (PE field).
+        - `sequence_version`: Sequence version (SV field).
+    """
 
     header_pattern = re.compile(
         r"^(?P<db>\w+)\|(?P<id>[-\w]+)\|(?P<entry>\w+)\s+(?P<name>.*?)"
@@ -194,7 +214,27 @@ class UniprotParser:
 
 
 class UniprotWriter:
-    """Uniprot FASTA header writer."""
+    """Writer for UniProt FASTA headers.
+
+    Reconstructs a standard UniProt header string from `header_fields`.
+
+    Required `header_fields` keys (see `UniprotWriter.required_fields`):
+        - `db`: Source database.
+        - `identifier`: UniProt accession number.
+        - `entry_name`: UniProt entry name.
+        - `protein_name`: Full protein name.
+
+    Optional `header_fields` keys (included in the header if present):
+        - `organism_name`: Written as `OS=...`.
+        - `organism_identifier`: Written as `OX=...`.
+        - `gene_name`: Written as `GN=...`.
+        - `protein_existence`: Written as `PE=...`.
+        - `sequence_version`: Written as `SV=...`.
+    """
+
+    required_fields: frozenset[str] = frozenset(
+        {"db", "identifier", "entry_name", "protein_name"}
+    )
 
     field_names = {
         "db": "db",
@@ -210,8 +250,19 @@ class UniprotWriter:
 
     @classmethod
     def write(cls, parsed_header: AbstractParsedHeader) -> str:
-        """Write a FASTA header string from a ParsedHeader object."""
+        """Write a FASTA header string from a ParsedHeader object.
+
+        Raises:
+            ValueError: If any required fields are missing from `header_fields`.
+                See `UniprotWriter.required_fields` for the list of required fields.
+        """
         fields = parsed_header.header_fields
+        missing = cls.required_fields - fields.keys()
+        if missing:
+            raise ValueError(
+                f"UniprotWriter is missing the following required header fields: "
+                f"{sorted(missing)}. See UniprotWriter.required_fields."
+            )
         header_entries = [
             f"{fields['db']}|{fields['identifier']}|{fields['entry_name']}",
             f"{fields['protein_name']}",
@@ -225,7 +276,25 @@ class UniprotWriter:
 
 
 class UniprotLikeParser:
-    """A tolerant FASTA header parser for UniProt like headers."""
+    """A tolerant parser for UniProt-like FASTA headers.
+
+    Parses headers that follow a relaxed UniProt-like format. The first
+    whitespace-separated token must be `db|identifier|entry_name`; the remainder
+    of the description is parsed on a best-effort basis.
+
+    The following `header_fields` keys are always present after parsing:
+        - `db`: Source database identifier.
+        - `identifier`: Accession or unique identifier.
+        - `entry_name`: Entry name.
+
+    The following `header_fields` keys are optional (only present if in the header):
+        - `protein_name`: Protein description (text before the first tag field).
+        - `organism_name`: Organism name (OS field).
+        - `organism_identifier`: NCBI taxonomy ID (OX field).
+        - `gene_name`: Gene name (GN field).
+        - `protein_existence`: Protein existence level (PE field).
+        - `sequence_version`: Sequence version (SV field).
+    """
 
     field_pattern = re.compile(
         r"(?:(\s+OS=(?P<OS>[^=]+))|"
@@ -285,12 +354,27 @@ class UniprotLikeParser:
 
 
 class UniprotLikeWriter:
-    """A tolerant FASTA header writer for UniProt like headers.
+    """Writer for UniProt-like FASTA headers.
 
-    In contrast to a strict UniProt header, the only required fields are the database,
-    the identifier, and the entry name. The other fields are optional and can be
-    omitted.
+    Reconstructs a UniProt-like header string from `header_fields`. More tolerant
+    than `UniprotWriter`: only the three core identifier fields are required; all
+    other fields are optional and are included in the header only if present.
+
+    Required `header_fields` keys (see `UniprotLikeWriter.required_fields`):
+        - `db`: Source database identifier.
+        - `identifier`: Accession or unique identifier.
+        - `entry_name`: Entry name.
+
+    Optional `header_fields` keys (included in the header if present):
+        - `protein_name`: Written after the identifier block.
+        - `organism_name`: Written as `OS=...`.
+        - `organism_identifier`: Written as `OX=...`.
+        - `gene_name`: Written as `GN=...`.
+        - `protein_existence`: Written as `PE=...`.
+        - `sequence_version`: Written as `SV=...`.
     """
+
+    required_fields: frozenset[str] = frozenset({"db", "identifier", "entry_name"})
 
     tag_names = {
         "OS": "organism_name",
@@ -302,8 +386,20 @@ class UniprotLikeWriter:
 
     @classmethod
     def write(cls, parsed_header: AbstractParsedHeader) -> str:
-        """Write a FASTA header string from a ParsedHeader object."""
+        """Write a FASTA header string from a ParsedHeader object.
+
+        Raises:
+            ValueError: If any required fields are missing from `header_fields`.
+                See `UniprotLikeWriter.required_fields` for the list of required
+                fields.
+        """
         fields = parsed_header.header_fields
+        missing = cls.required_fields - fields.keys()
+        if missing:
+            raise ValueError(
+                f"UniprotLikeWriter is missing the following required header fields: "
+                f"{sorted(missing)}. See UniprotLikeWriter.required_fields."
+            )
         header_entries = [
             f"{fields['db']}|{fields['identifier']}|{fields['entry_name']}",
         ]
@@ -385,7 +481,7 @@ def replace_parser(name: str, parser: AbstractHeaderParser) -> None:
 
     Args:
         name: The name of the custom parser to replace.
-        parser: The new parser class to register under ``name``.
+        parser: The new parser class to register under `name`.
 
     Raises:
         KeyError: If `name` refers to a built-in parser, which cannot be replaced.
