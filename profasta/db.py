@@ -13,8 +13,9 @@ Classes:
 from __future__ import annotations
 
 import logging
+import pathlib
 from dataclasses import dataclass
-from pathlib import Path
+from os import PathLike
 from typing import Any, Iterator, Optional, Protocol
 
 import profasta.io
@@ -77,7 +78,7 @@ class ProteinDatabase:
 
     def add_fasta(
         self,
-        path: str,
+        path: PathLike,
         header_parser: str,
         fasta_name: Optional[str] = None,
         overwrite: bool = False,
@@ -99,7 +100,7 @@ class ProteinDatabase:
                 could not be parsed by the header_parser. Headers of skipped entries are
                 stored in the skipped_fasta_entries attribute.
         """
-        fasta_name = fasta_name if fasta_name is not None else Path(path).name
+        fasta_name = fasta_name if fasta_name is not None else pathlib.Path(path).name
         parser = get_parser(header_parser)
         parsed_protein_entries: list[DatabaseEntry] = []
         skipped_entry_headers: list[str] = []
@@ -163,7 +164,7 @@ class ProteinDatabase:
 
     def write_fasta(
         self,
-        path: str,
+        path: PathLike,
         append: bool = False,
         header_writer: Optional[str] = None,
         line_width: int = 60,

@@ -9,6 +9,7 @@ Functions:
 
 import pathlib
 from copy import deepcopy
+from os import PathLike
 
 import profasta.io
 from profasta.db import ProteinDatabase
@@ -44,7 +45,7 @@ def create_decoy_db(
 
 def write_decoy_fasta(
     db: ProteinDatabase,
-    path: str,
+    path: PathLike,
     append: bool = False,
     decoy_tag: str = "rev_",
     keep_nterm: bool = False,
