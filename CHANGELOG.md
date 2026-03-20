@@ -2,8 +2,8 @@
 
 ---
 
-## Version [0.0.6]
-Released: 2026-03-19
+## Version [0.1.0]
+Released: 2026-03-20
  
 ### Added
 - `ProteinDatabase` now implements dict-like interface with `__len__`, `__bool__`, and `__repr__` methods.
