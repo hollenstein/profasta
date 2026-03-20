@@ -16,7 +16,7 @@ import logging
 import pathlib
 from dataclasses import dataclass
 from os import PathLike
-from typing import Any, Iterator, Optional, Protocol
+from typing import Any, ItemsView, Iterator, KeysView, Optional, Protocol, ValuesView
 
 import profasta.io
 from profasta.parser import get_parser, get_writer
@@ -200,13 +200,13 @@ class ProteinDatabase:
         """Get a protein entry by its identifier or return a default value."""
         return self._db.get(identifier, default)
 
-    def keys(self):
+    def keys(self) -> KeysView[str]:
         return self._db.keys()
 
-    def values(self):
+    def values(self) -> ValuesView[AbstractDatabaseEntry]:
         return self._db.values()
 
-    def items(self):
+    def items(self) -> ItemsView[str, AbstractDatabaseEntry]:
         return self._db.items()
 
     def __bool__(self) -> bool:
