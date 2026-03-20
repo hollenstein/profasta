@@ -181,16 +181,15 @@ class ProteinDatabase:
             line_width: The number of sequence characters per line, the default value is
                 60. If -1, the sequence is not split into multiple lines.
         """
+        fasta_records: list[profasta.io.AbstractFastaRecord] = []
         if header_writer is None:
             fasta_records = list(self._db.values())
         else:
-            fasta_records = []
             writer = get_writer(header_writer)
             for protein_entry in self._db.values():
                 header = writer.write(protein_entry)
-
                 fasta_records.append(
-                    DatabaseEntry("", header, protein_entry.sequence, {})
+                    profasta.io.FastaRecord(header, protein_entry.sequence)
                 )
         file_open_mode = "a" if append else "w"
         with open(path, file_open_mode) as file:
