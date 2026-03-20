@@ -92,9 +92,9 @@ class ProteinDatabase:
                 The parser must be registered in the global parser registry.
             fasta_name: Optional name for the FASTA file. If not provided, the filename
                 will be used instead.
-            overwrite: If True, overwrite an existing entry with the same identifier.
-                If False and an entry with the same identifier already exists, a
-                KeyError will be raised.
+            overwrite: If True, overwrite existing entries with duplicate identifiers.
+                If False and any entry from the file has an identifier already present
+                in the database, a KeyError is raised before any entries are added.
             skip_invalid: If True, entries with a non-parsable header are skipped. If
                 False, a ValueError is raised when an entry is encountered which header
                 could not be parsed by the header_parser. Headers of skipped entries are
@@ -125,6 +125,16 @@ class ProteinDatabase:
                     parsed_header.header_fields,
                 )
                 parsed_protein_entries.append(protein_entry)
+
+        if not overwrite:
+            duplicates = [
+                e.identifier for e in parsed_protein_entries if e.identifier in self._db
+            ]
+            if duplicates:
+                raise KeyError(
+                    f"{len(duplicates)} identifier(s) from '{fasta_name}' are already "
+                    f"present in the database. No entries were added."
+                )
 
         self.added_fasta_files.append(fasta_name)
         self.skipped_fasta_entries[fasta_name] = skipped_entry_headers
