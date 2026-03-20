@@ -30,7 +30,7 @@ class TestProteinDatabase:
         protein_db.add_fasta(
             fasta_path, header_parser="uniprot_like", skip_invalid=True
         )
-        assert len(protein_db.db) == 1 and "uniprot_like_01" in protein_db.db
+        assert len(protein_db) == 1 and "uniprot_like_01" in protein_db
 
     def test_add_fasta_adds_records_invalid_entry_headers_when_skip_invalid_is_true(self, tmp_path):  # fmt: skip
         fasta_entries = [
@@ -61,5 +61,5 @@ class TestProteinDatabase:
         except ValueError:
             pass
 
-        assert len(protein_db.db) == 0
+        assert len(protein_db) == 0
         assert len(protein_db.added_fasta_files) == 0

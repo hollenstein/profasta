@@ -59,7 +59,6 @@ class ProteinDatabase:
     - Check if non-empty: `bool(db)` or `if db:`
 
     Attributes:
-        db: Dictionary mapping protein identifiers to protein entries.
         added_fasta_files: List of FASTA files that have been imported into the
             database.
         skipped_fasta_entries: Dictionary mapping added FASTA names to lists of FASTA
@@ -67,12 +66,12 @@ class ProteinDatabase:
             not added to the database.
     """
 
-    db: dict[str, AbstractDatabaseEntry]
     added_fasta_files: list[str]
     skipped_fasta_entries: dict[str, list[str]]
+    _db: dict[str, AbstractDatabaseEntry]
 
     def __init__(self):
-        self.db = {}
+        self._db = {}
         self.added_fasta_files = []
         self.skipped_fasta_entries = {}
 
@@ -149,7 +148,7 @@ class ProteinDatabase:
                 If False and an entry with the same identifier already exists, a
                 KeyError will be raised.
         """
-        if protein_entry.identifier in self.db:
+        if protein_entry.identifier in self._db:
             if overwrite:
                 logger.warning(
                     f"Overwriting existing entry with identifier "
@@ -160,7 +159,7 @@ class ProteinDatabase:
                     f"Identifier '{protein_entry.identifier}' already in database."
                 )
 
-        self.db[protein_entry.identifier] = protein_entry
+        self._db[protein_entry.identifier] = protein_entry
 
     def write_fasta(
         self,
@@ -182,11 +181,11 @@ class ProteinDatabase:
                 60. If -1, the sequence is not split into multiple lines.
         """
         if header_writer is None:
-            fasta_records = list(self.db.values())
+            fasta_records = list(self._db.values())
         else:
             fasta_records = []
             writer = get_writer(header_writer)
-            for protein_entry in self.db.values():
+            for protein_entry in self._db.values():
                 header = writer.write(protein_entry)
 
                 fasta_records.append(
@@ -198,37 +197,37 @@ class ProteinDatabase:
 
     def get(self, identifier: str, default: Any = None) -> DatabaseEntry | Any:
         """Get a protein entry by its identifier or return a default value."""
-        return self.db.get(identifier, default)
+        return self._db.get(identifier, default)
 
     def keys(self):
-        return self.db.keys()
+        return self._db.keys()
 
     def values(self):
-        return self.db.values()
+        return self._db.values()
 
     def items(self):
-        return self.db.items()
+        return self._db.items()
 
     def __bool__(self) -> bool:
         """Return True if the database contains any entries."""
-        return bool(self.db)
+        return bool(self._db)
 
     def __getitem__(self, identifier) -> AbstractDatabaseEntry:
-        return self.db[identifier]
+        return self._db[identifier]
 
     def __contains__(self, identifier) -> bool:
-        return identifier in self.db
+        return identifier in self._db
 
     def __iter__(self) -> Iterator[str]:
-        return iter(self.db)
+        return iter(self._db)
 
     def __len__(self) -> int:
         """Return the number of protein entries in the database."""
-        return len(self.db)
+        return len(self._db)
 
     def __repr__(self) -> str:
         """Return a string representation of the ProteinDatabase."""
-        num_entries = len(self.db)
+        num_entries = len(self._db)
         num_files = len(self.added_fasta_files)
         total_skipped = sum(
             len(headers) for headers in self.skipped_fasta_entries.values()
