@@ -76,6 +76,51 @@ class ProteinDatabase:
         self.added_fasta_files = []
         self.skipped_fasta_entries = {}
 
+    @classmethod
+    def from_fasta(
+        cls,
+        *paths: PathLike,
+        header_parser: str,
+        overwrite: bool = False,
+        skip_invalid: bool = False,
+    ) -> "ProteinDatabase":
+        """Create a ProteinDatabase from one or more FASTA files.
+
+        A convenience constructor that creates a new database and immediately populates
+        it by calling `.add_fasta` for each supplied path. All paths are parsed with the
+        same `header_parser`.
+
+        Args:
+            *paths: One or more paths to FASTA files to import.
+            header_parser: The name of the parser to use for parsing the FASTA headers.
+                The parser must be registered in the global parser registry.
+            overwrite: If True, overwrite existing entries with duplicate identifiers.
+                If False and any entry from the file has an identifier already present
+                in the database, a KeyError is raised before any entries are added.
+            skip_invalid: If True, entries with a non-parsable header are skipped. If
+                False, a ValueError is raised when an entry is encountered which header
+                could not be parsed by the header_parser. Headers of skipped entries are
+                stored in the skipped_fasta_entries attribute.
+
+        Returns:
+            A `ProteinDatabase` populated with all entries from the supplied FASTA files.
+
+        Raises:
+            KeyError: If `overwrite` is `False` and a duplicate identifier is found
+                across the imported files.
+            ValueError: If `skip_invalid` is `False` and a FASTA header cannot be parsed
+                by `header_parser`.
+        """
+        db = cls()
+        for path in paths:
+            db.add_fasta(
+                path,
+                header_parser,
+                overwrite=overwrite,
+                skip_invalid=skip_invalid,
+            )
+        return db
+
     def add_fasta(
         self,
         path: PathLike,
@@ -99,6 +144,12 @@ class ProteinDatabase:
                 False, a ValueError is raised when an entry is encountered which header
                 could not be parsed by the header_parser. Headers of skipped entries are
                 stored in the skipped_fasta_entries attribute.
+
+        Raises:
+            KeyError: If `overwrite` is `False` and a duplicate identifier is found
+                across the imported files.
+            ValueError: If `skip_invalid` is `False` and a FASTA header cannot be parsed
+                by `header_parser`.
         """
         fasta_name = fasta_name if fasta_name is not None else pathlib.Path(path).name
         parser = get_parser(header_parser)

@@ -4,6 +4,19 @@ import profasta.db
 
 
 class TestProteinDatabase:
+    def test_from_fasta_imports_entries_from_multiple_paths(self, tmp_path):
+        path1 = tmp_path / "a.fasta"
+        path2 = tmp_path / "b.fasta"
+        path1.write_text(">xx|id_01|entry\nMKKK")
+        path2.write_text(">xx|id_02|entry\nMRRR")
+
+        db = profasta.db.ProteinDatabase.from_fasta(
+            path1, path2, header_parser="uniprot_like"
+        )
+        assert len(db) == 2
+        assert "id_01" in db and "id_02" in db
+        assert "a.fasta" in db.added_fasta_files and "b.fasta" in db.added_fasta_files
+
     def test_add_fasta_raises_value_error_when_a_header_cannot_be_parsed(self, tmp_path):  # fmt: skip
         fasta_entries = [
             ">xx|uniprot_like_01|entry\nMKKK",
