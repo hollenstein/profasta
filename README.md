@@ -1,5 +1,5 @@
 # ProFASTA
-[![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 ![Python Version from PEP 621 TOML](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fhollenstein%2Fprofasta%2Fmain%2Fpyproject.toml)
 [![pypi](https://img.shields.io/pypi/v/profasta)](https://pypi.org/project/profasta)
 [![CI](https://github.com/hollenstein/profasta/actions/workflows/ci.yml/badge.svg)](https://github.com/hollenstein/profasta/actions/workflows/ci.yml)
