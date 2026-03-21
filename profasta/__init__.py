@@ -6,7 +6,7 @@ from .decoy import create_decoy_db, write_decoy_fasta
 
 __author__ = "David M. Hollenstein"
 __license__ = "MIT"
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __all__ = [
     "DatabaseEntry",
     "ProteinDatabase",
