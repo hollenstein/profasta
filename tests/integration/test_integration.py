@@ -1,8 +1,15 @@
 from pathlib import Path
 
+import pytest
+
 import profasta
 
 FASTA_PATH = Path(__file__).parent / "uniprot_hsapiens_10entries.fasta"
+
+
+@pytest.fixture(autouse=True)
+def reset_registries():
+    profasta.parser._reset_registries()
 
 
 class CustomParser:

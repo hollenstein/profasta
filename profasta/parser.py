@@ -588,3 +588,14 @@ def list_writers() -> list[str]:
         A list of writer names, including both built-in and custom writers.
     """
     return sorted(_WRITER_REGISTRY)
+
+
+def _reset_registries():
+    """Internal helper to restore registries to built-in state."""
+    for name in list(_PARSER_REGISTRY):
+        if name not in _BUILTIN_PARSERS:
+            del _PARSER_REGISTRY[name]
+
+    for name in list(_WRITER_REGISTRY):
+        if name not in _BUILTIN_WRITERS:
+            del _WRITER_REGISTRY[name]

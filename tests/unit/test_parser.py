@@ -3,6 +3,11 @@ import pytest
 import profasta.parser
 
 
+@pytest.fixture(autouse=True)
+def reset_registries():
+    profasta.parser._reset_registries()
+
+
 class TestDefaultParser:
     def test_parse_header_with_description(self):
         header = "P12345 Some protein description"
