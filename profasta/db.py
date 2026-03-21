@@ -78,7 +78,6 @@ class ProteinDatabase:
 
     added_fasta_files: list[str]
     skipped_fasta_entries: dict[str, list[str]]
-    _db: dict[str, AbstractDatabaseEntry]
 
     def __init__(self):
         self._db = {}
