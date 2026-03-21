@@ -64,7 +64,9 @@ ProFASTA uses a registry system for header parsers and writers. Built-in parsers
 | `"uniprot"` | Strict UniProt format parser |
 | `"uniprot_like"` | Tolerant UniProt-like format parser |
 
-Built-in writers follow the same naming convention and include an additional `"decoy"` writer that prepends a `rev_` tag to the header.
+Built-in writers follow the same naming convention.
+
+> Note: A `DecoyWriter` is available but **not** registered by default. It prepends "rev_" to the header string. You can manually register it or create a version with a custom tag using `DecoyWriter.with_tag("your_tag")`.
 
 Custom parsers and writers can be registered via:
 
