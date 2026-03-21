@@ -263,6 +263,8 @@ class ProteinDatabase:
     ):
         """Write all protein entries in the database to a FASTA file.
 
+        Parent directories of `path` are created automatically if they do not exist.
+
         Args:
             path: The path to write the FASTA file to.
             append: If False, the file is created or overwritten. If True, the entries
@@ -283,6 +285,9 @@ class ProteinDatabase:
                 fasta_records.append(
                     profasta.io.FastaRecord(header, protein_entry.sequence)
                 )
+
+        output_path = pathlib.Path(path)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
         file_open_mode = "a" if append else "w"
         with open(path, file_open_mode, encoding="utf-8") as file:
             profasta.io.write_fasta(file, fasta_records, line_width)
