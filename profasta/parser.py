@@ -155,7 +155,7 @@ class DecoyWriter:
 class UniprotParser:
     """Parser for UniProt FASTA headers.
 
-    Parses the standard UniProt header format:
+    Parses the standard UniProt header format and stores all fields as strings:
     `db|identifier|entry_name protein_name OS=... OX=... GN=... PE=... SV=...`
 
     The following `header_fields` keys are always present after parsing:
@@ -278,9 +278,9 @@ class UniprotWriter:
 class UniprotLikeParser:
     """A tolerant parser for UniProt-like FASTA headers.
 
-    Parses headers that follow a relaxed UniProt-like format. The first
-    whitespace-separated token must be `db|identifier|entry_name`; the remainder
-    of the description is parsed on a best-effort basis.
+    Parses headers that follow a relaxed UniProt-like format and stores all fields as
+    strings. The first whitespace-separated token must be `db|identifier|entry_name`;
+    the remainder of the description is parsed on a best-effort basis.
 
     The following `header_fields` keys are always present after parsing:
         - `db`: Source database identifier.
