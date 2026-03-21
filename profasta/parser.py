@@ -414,23 +414,23 @@ class UniprotLikeWriter:
         return " ".join(header_entries)
 
 
-_PARSER_REGISTRY: dict[str, AbstractHeaderParser] = {
+_PARSER_REGISTRY: dict[str, type[AbstractHeaderParser]] = {
     "default": DefaultParser,
     "uniprot": UniprotParser,
     "uniprot_like": UniprotLikeParser,
 }
 
-_WRITER_REGISTRY: dict[str, AbstractHeaderWriter] = {
+_WRITER_REGISTRY: dict[str, type[AbstractHeaderWriter]] = {
     "default": DefaultWriter,
     "uniprot": UniprotWriter,
     "uniprot_like": UniprotLikeWriter,
 }
 
-_BUILTIN_PARSERS: frozenset[str] = frozenset({k for k in _PARSER_REGISTRY})
-_BUILTIN_WRITERS: frozenset[str] = frozenset({k for k in _WRITER_REGISTRY})
+_BUILTIN_PARSERS: frozenset[str] = frozenset(_PARSER_REGISTRY)
+_BUILTIN_WRITERS: frozenset[str] = frozenset(_WRITER_REGISTRY)
 
 
-def register_parser(name: str, parser: AbstractHeaderParser) -> None:
+def register_parser(name: str, parser: type[AbstractHeaderParser]) -> None:
     """Register a custom FASTA header parser by name.
 
     Args:
@@ -456,7 +456,7 @@ def register_parser(name: str, parser: AbstractHeaderParser) -> None:
     _PARSER_REGISTRY[name] = parser
 
 
-def get_parser(name: str) -> AbstractHeaderParser:
+def get_parser(name: str) -> type[AbstractHeaderParser]:
     """Get a registered FASTA header parser by name.
 
     Args:
@@ -476,7 +476,7 @@ def get_parser(name: str) -> AbstractHeaderParser:
     return _PARSER_REGISTRY[name]
 
 
-def replace_parser(name: str, parser: AbstractHeaderParser) -> None:
+def replace_parser(name: str, parser: type[AbstractHeaderParser]) -> None:
     """Replace a previously registered non-built-in parser.
 
     Args:
@@ -484,17 +484,17 @@ def replace_parser(name: str, parser: AbstractHeaderParser) -> None:
         parser: The new parser class to register under `name`.
 
     Raises:
-        KeyError: If `name` refers to a built-in parser, which cannot be replaced.
-        KeyError: If no custom parser is registered under `name`. Use `register_parser`
-            to add a new parser.
+        ValueError: If `name` refers to a built-in parser, which cannot be replaced.
+        ValueError: If no custom parser is registered under `name`. Use
+            `register_parser` to add a new parser.
     """
     if name in _BUILTIN_PARSERS:
-        raise KeyError(
+        raise ValueError(
             f"Cannot replace '{name}': built-in parsers cannot be overwritten. "
             f"Built-in parsers are: {sorted(_BUILTIN_PARSERS)}."
         )
     if name not in _PARSER_REGISTRY:
-        raise KeyError(
+        raise ValueError(
             f"No custom parser registered under the name '{name}'. "
             f"Use register_parser() to add a new parser."
         )
@@ -507,10 +507,10 @@ def list_parsers() -> list[str]:
     Returns:
         A list of parser names, including both built-in and custom parsers.
     """
-    return list(_PARSER_REGISTRY)
+    return sorted(_PARSER_REGISTRY)
 
 
-def register_writer(name: str, writer: AbstractHeaderWriter) -> None:
+def register_writer(name: str, writer: type[AbstractHeaderWriter]) -> None:
     """Register a custom FASTA header writer by name.
 
     Args:
@@ -536,7 +536,7 @@ def register_writer(name: str, writer: AbstractHeaderWriter) -> None:
     _WRITER_REGISTRY[name] = writer
 
 
-def get_writer(name: str) -> AbstractHeaderWriter:
+def get_writer(name: str) -> type[AbstractHeaderWriter]:
     """Get a registered FASTA header writer by name.
 
     Args:
@@ -556,7 +556,7 @@ def get_writer(name: str) -> AbstractHeaderWriter:
     return _WRITER_REGISTRY[name]
 
 
-def replace_writer(name: str, writer: AbstractHeaderWriter) -> None:
+def replace_writer(name: str, writer: type[AbstractHeaderWriter]) -> None:
     """Replace a previously registered non-built-in writer.
 
     Args:
@@ -564,17 +564,17 @@ def replace_writer(name: str, writer: AbstractHeaderWriter) -> None:
         writer: The new writer class to register under `name`.
 
     Raises:
-        KeyError: If `name` refers to a built-in writer, which cannot be replaced.
-        KeyError: If no custom writer is registered under `name`. Use `register_writer`
-            to add a new writer.
+        ValueError: If `name` refers to a built-in writer, which cannot be replaced.
+        ValueError: If no custom writer is registered under `name`. Use
+            `register_writer` to add a new writer.
     """
     if name in _BUILTIN_WRITERS:
-        raise KeyError(
+        raise ValueError(
             f"Cannot replace '{name}': built-in writers cannot be overwritten. "
             f"Built-in writers are: {sorted(_BUILTIN_WRITERS)}."
         )
     if name not in _WRITER_REGISTRY:
-        raise KeyError(
+        raise ValueError(
             f"No custom writer registered under the name '{name}'. "
             f"Use register_writer() to add a new writer."
         )
@@ -587,4 +587,4 @@ def list_writers() -> list[str]:
     Returns:
         A list of writer names, including both built-in and custom writers.
     """
-    return list(_WRITER_REGISTRY)
+    return sorted(_WRITER_REGISTRY)

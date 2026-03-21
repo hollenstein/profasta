@@ -168,11 +168,11 @@ class TestParserRegistry:
         assert profasta.parser.get_parser("replaceable_parser") is ParserV2
 
     def test_replace_builtin_parser_raises_key_error(self):
-        with pytest.raises(KeyError, match="built-in"):
+        with pytest.raises(ValueError, match="built-in"):
             profasta.parser.replace_parser("uniprot", profasta.parser.DefaultParser)
 
     def test_replace_unregistered_parser_raises_key_error(self):
-        with pytest.raises(KeyError, match="nonexistent_parser"):
+        with pytest.raises(ValueError, match="nonexistent_parser"):
             profasta.parser.replace_parser(
                 "nonexistent_parser", profasta.parser.DefaultParser
             )
@@ -234,11 +234,11 @@ class TestWriterRegistry:
         assert profasta.parser.get_writer("replaceable_writer") is WriterV2
 
     def test_replace_builtin_writer_raises_key_error(self):
-        with pytest.raises(KeyError, match="built-in"):
+        with pytest.raises(ValueError, match="built-in"):
             profasta.parser.replace_writer("default", profasta.parser.DefaultWriter)
 
     def test_replace_unregistered_writer_raises_key_error(self):
-        with pytest.raises(KeyError, match="nonexistent_writer"):
+        with pytest.raises(ValueError, match="nonexistent_writer"):
             profasta.parser.replace_writer(
                 "nonexistent_writer", profasta.parser.DefaultWriter
             )
