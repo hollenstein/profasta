@@ -69,14 +69,14 @@ def parse_fasta(file_object: IO[str]) -> Generator[FastaRecord, None, None]:
 def write_fasta(
     file_object: IO[str],
     fasta_records: Iterable[AbstractFastaRecord],
-    line_width: int = -1,
+    line_width: int = 60,
 ):
     """Write a list of FASTA entries to a file object.
 
     Args:
         file_object: A file object to write to.
         fasta_records: A list of FastaRecords.
-        line_width: The number of sequence characters per line, the default value is -1.
+        line_width: The number of sequence characters per line, the default value is 60.
             If -1, the sequence is not split into multiple lines.
     """
     fasta_strings = [
