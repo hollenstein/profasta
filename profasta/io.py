@@ -79,12 +79,9 @@ def write_fasta(
         line_width: The number of sequence characters per line, the default value is 60.
             If -1, the sequence is not split into multiple lines.
     """
-    fasta_strings = [
-        make_record_string(entry.header, entry.sequence, line_width)
-        for entry in fasta_records
-    ]
-    file_object.write("\n".join(fasta_strings))
-    file_object.write("\n")
+    for entry in fasta_records:
+        record_str = make_record_string(entry.header, entry.sequence, line_width)
+        file_object.write(record_str + "\n")
 
 
 def make_record_string(header: str, sequence: str, line_width: int = -1) -> str:
