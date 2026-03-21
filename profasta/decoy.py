@@ -89,7 +89,7 @@ def write_decoy_fasta(
     output_path = pathlib.Path(path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     file_open_mode = "a" if append else "w"
-    with open(output_path, file_open_mode) as file:
+    with open(output_path, file_open_mode, encoding="utf-8") as file:
         profasta.io.write_fasta(file, fasta_records, line_width)
 
 

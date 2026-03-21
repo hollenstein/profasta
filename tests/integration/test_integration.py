@@ -21,7 +21,7 @@ def test_built_in_uniprot_header_parser_read_write_header_roundtrip():
     UniprotParser = profasta.parser.get_parser("uniprot")
     UniprotWriter = profasta.parser.get_writer("uniprot")
 
-    with open(FASTA_PATH, "r") as file:
+    with open(FASTA_PATH, "r", encoding="utf-8") as file:
         for fasta_record in profasta.io.parse_fasta(file):
             parsed_header = UniprotParser.parse(fasta_record.header)
             written_header = UniprotWriter.write(parsed_header)
@@ -35,7 +35,7 @@ def test_custom_header_parser_read_write_header_roundtrip():
     TestParser = profasta.parser.get_parser("test_parser")
     TestWriter = profasta.parser.get_writer("test_writer")
 
-    with open(FASTA_PATH, "r") as file:
+    with open(FASTA_PATH, "r", encoding="utf-8") as file:
         for fasta_record in profasta.io.parse_fasta(file):
             parsed_header = TestParser.parse(fasta_record.header)
             written_header = TestWriter.write(parsed_header)
@@ -103,7 +103,7 @@ def test_write_decoy_fasta(tmp_path):
     )
 
     decoy_records = {}
-    with open(decoy_fasta_path, "r") as file:
+    with open(decoy_fasta_path, "r", encoding="utf-8") as file:
         for record in profasta.io.parse_fasta(file):
             decoy_records[record.header] = record
 

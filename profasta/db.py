@@ -164,7 +164,7 @@ class ProteinDatabase:
         parsed_protein_entries: list[DatabaseEntry] = []
         skipped_entry_headers: list[str] = []
 
-        with open(path, "r") as file:
+        with open(path, "r", encoding="utf-8") as file:
             for fasta_record in profasta.io.parse_fasta(file):
                 try:
                     parsed_header = parser.parse(fasta_record.header)
@@ -284,7 +284,7 @@ class ProteinDatabase:
                     profasta.io.FastaRecord(header, protein_entry.sequence)
                 )
         file_open_mode = "a" if append else "w"
-        with open(path, file_open_mode) as file:
+        with open(path, file_open_mode, encoding="utf-8") as file:
             profasta.io.write_fasta(file, fasta_records, line_width)
 
     def get(self, identifier: str, default: Any = None) -> DatabaseEntry | Any:
