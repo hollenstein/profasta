@@ -66,7 +66,7 @@ ProFASTA uses a registry system for header parsers and writers. Built-in parsers
 
 Built-in writers follow the same naming convention.
 
-> Note: A `DecoyWriter` is available but **not** registered by default. It prepends "rev_" to the header string. You can manually register it or create a version with a custom tag using `DecoyWriter.with_tag("your_tag")`.
+> **Note**: A `DecoyWriter` is available but **not** registered by default. It prepends "rev_" to the header string. You can manually register it or create a version with a custom tag using `DecoyWriter.with_tag("your_tag")`.
 
 Custom parsers and writers can be registered via:
 
@@ -76,6 +76,24 @@ profasta.parser.register_writer("my_writer", MyWriter)
 ```
 
 A parser must implement a `parse(header: str) -> ParsedHeader` classmethod, and a writer must implement a `write(parsed_header: ParsedHeader) -> str` classmethod.
+
+### Parsed Uniprot header fields
+
+The following `header_fields` keys are available after parsing with `UniprotParser` or `UniprotLikeParser`. Guaranteed fields are always present; optional fields are only populated if the corresponding tag was found in the header.
+
+> **Note**: All fields are stored as strings, including `organism_identifier`.
+
+| Field | UniprotParser | UniprotLikeParser | Notes |
+|---|---|---|---|
+| `db` | guaranteed | guaranteed | Source database identifier |
+| `identifier` | guaranteed | guaranteed | Accession or unique ID |
+| `entry_name` | guaranteed | guaranteed | Entry name |
+| `protein_name` | guaranteed | optional | Text before the first tag field |
+| `organism_name` | optional | optional | OS field |
+| `organism_identifier` | optional | optional | OX field (NCBI taxonomy ID) |
+| `gene_name` | optional | optional | GN field |
+| `protein_existence` | optional | optional | PE field |
+| `sequence_version` | optional | optional | SV field |
 
 ### ProteinDatabase
 
