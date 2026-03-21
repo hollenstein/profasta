@@ -9,8 +9,8 @@ Classes:
     HeaderAsciiIssue: Represents a non-ASCII validation issue for a single header.
 
 Functions:
-    check_ascii_issues: Check a collection of FASTA records for non-ASCII characters
-        in their headers.
+    find_header_ascii_issues: Check a collection of FASTA records for non-ASCII
+        characters in their headers.
 """
 
 from dataclasses import dataclass, field
