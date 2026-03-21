@@ -11,6 +11,7 @@ Functions:
     write_fasta: Write a list of FastaRecords to a file object.
 """
 
+import io
 from dataclasses import dataclass
 from typing import IO, Generator, Iterable, Protocol
 
@@ -73,12 +74,29 @@ def write_fasta(
 ):
     """Write a list of FASTA entries to a file object.
 
+    If the file object is not empty and does not end with a newline, a newline is added
+    before writing the FASTA records to ensure that the first FASTA entry is written on
+    a new line. Note that this check is only performed for file objects that support
+    seeking.
+
     Args:
         file_object: A file object to write to.
         fasta_records: A list of FastaRecords.
         line_width: The number of sequence characters per line, the default value is 60.
             If -1, the sequence is not split into multiple lines.
     """
+    if file_object.tell() > 0:
+        try:
+            current_file_pos = file_object.tell()
+            file_object.seek(current_file_pos - 1)
+            last_char = file_object.read(1)
+            if last_char != "\n":
+                file_object.write("\n")
+            else:
+                file_object.seek(current_file_pos)
+        except (OSError, io.UnsupportedOperation):
+            pass
+
     for entry in fasta_records:
         record_str = make_record_string(entry.header, entry.sequence, line_width)
         file_object.write(record_str + "\n")

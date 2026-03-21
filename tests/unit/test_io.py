@@ -23,20 +23,39 @@ def test_parse_fasta_file(fasta_content, expected_header, expected_sequence):
     assert record.sequence == expected_sequence
 
 
-def test_write_fasta_file():
-    fasta_records = [
-        profasta.io.FastaRecord(header="Header1", sequence="ACGT"),
-        profasta.io.FastaRecord(header="Header2", sequence="TGCA"),
-    ]
+class TestWriteFasta:
+    def test_standard_write(self):
+        buffer = io.StringIO()
+        record_1 = profasta.io.FastaRecord(header="H1", sequence="ACGT")
+        record_2 = profasta.io.FastaRecord(header="H2", sequence="TGCA")
+        profasta.io.write_fasta(buffer, [record_1, record_2])
 
-    file_buffer = io.StringIO()
-    profasta.io.write_fasta(file_buffer, fasta_records)
+        expected = ">H1\nACGT\n>H2\nTGCA\n"
+        assert buffer.getvalue() == expected
 
-    file_buffer.seek(0)
-    file_contents = file_buffer.read()
+    def test_multiple_calls_to_same_buffer(self):
+        buffer = io.StringIO()
+        record_1 = profasta.io.FastaRecord(header="H1", sequence="ACGT")
+        record_2 = profasta.io.FastaRecord(header="H2", sequence="TGCA")
+        profasta.io.write_fasta(buffer, [record_1])
+        profasta.io.write_fasta(buffer, [record_2])
 
-    expected_output = ">Header1\nACGT\n>Header2\nTGCA\n"
-    assert file_contents == expected_output
+        expected = ">H1\nACGT\n>H2\nTGCA\n"
+        assert buffer.getvalue() == expected
+
+    def test_append_to_file_adds_missing_newline(self):
+        buffer = io.StringIO("EXISTING_DATA")  # No trailing newline
+        buffer.seek(0, io.SEEK_END)  # Move to end as if opening in append mode
+        record = profasta.io.FastaRecord(header="H1", sequence="ACGT")
+        profasta.io.write_fasta(buffer, [record])
+        assert buffer.getvalue() == "EXISTING_DATA\n>H1\nACGT\n"
+
+    def test_append_to_file_with_existing_newline_does_not_add_another(self):
+        buffer = io.StringIO("EXISTING_DATA\n")  # Trailing newline
+        buffer.seek(0, io.SEEK_END)  # Move to end as if opening in append mode
+        record = profasta.io.FastaRecord(header="H1", sequence="ACGT")
+        profasta.io.write_fasta(buffer, [record])
+        assert buffer.getvalue() == "EXISTING_DATA\n>H1\nACGT\n"
 
 
 class TestMakeRecordString:
