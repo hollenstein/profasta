@@ -2,6 +2,25 @@
 
 ---
 
+## Version [0.1.1]
+Released: 2026-03-21
+
+### Added
+- `ProteinDatabase.write_fasta()` now automatically creates missing parent directories.
+- `write_fasta()` now ensures output starts on a new line when appending to an existing file.
+
+### Changed
+- `ProteinDatabase` now inherits from `collections.abc.Mapping`.
+- Default FASTA line width in `io.write_fasta()` changed to 60 characters, to ensure consistency with `db.ProteinDatabase.write_fasta()`.
+- Registry operations now have standardized error semantics.
+- Clarified in readme that DecoyWriter is not registered by default; refined parser docstrings.
+
+### Fixed
+- UTF-8 encoding is now enforced for all file I/O for cross-platform consistency.
+- Remaining unintended public exposure of the `_db` attribute removed from `ProteinDatabase`.
+
+---
+
 ## Version [0.1.0]
 Released: 2026-03-20
  
