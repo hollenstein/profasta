@@ -1,6 +1,6 @@
 """ProFASTA - A Python library for working with protein containing FASTA files."""
 
-from . import io, parser, validation
+from . import db, decoy, io, parser, validation
 from .db import DatabaseEntry, ProteinDatabase
 from .decoy import create_decoy_db, write_decoy_fasta
 
@@ -12,6 +12,9 @@ __all__ = [
     "ProteinDatabase",
     "create_decoy_db",
     "write_decoy_fasta",
+    # submodules
+    "db",
+    "decoy",
     "parser",
     "io",
     "validation",
