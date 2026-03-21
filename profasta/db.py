@@ -14,17 +14,15 @@ from __future__ import annotations
 
 import logging
 import pathlib
+from collections.abc import Mapping
 from dataclasses import dataclass
 from os import PathLike
 from typing import (
-    Any,
     Callable,
-    ItemsView,
     Iterator,
-    KeysView,
     Optional,
     Protocol,
-    ValuesView,
+    Self,
 )
 
 import profasta.io
@@ -52,7 +50,7 @@ class DatabaseEntry:
     header_fields: dict[str, str]
 
 
-class ProteinDatabase:
+class ProteinDatabase(Mapping[str, AbstractDatabaseEntry]):
     """A database for storing protein entries derived from FASTA files.
 
     This class provides functionality for managing a collection of protein entries
@@ -231,9 +229,7 @@ class ProteinDatabase:
 
         self._db[protein_entry.identifier] = protein_entry
 
-    def filter(
-        self, condition: Callable[[AbstractDatabaseEntry], bool]
-    ) -> "ProteinDatabase":
+    def filter(self, condition: Callable[[AbstractDatabaseEntry], bool]) -> Self:
         """Return a new ProteinDatabase containing only entries matching a condition.
 
         Note that the returned database has empty `added_fasta_files` and
@@ -248,7 +244,7 @@ class ProteinDatabase:
             A new instance of `ProteinDatabase` containing only the entries for which
             `condition` returns `True`.
         """
-        new_db = ProteinDatabase()
+        new_db = type(self)()
         for entry in self._db.values():
             if condition(entry):
                 new_db.add_entry(entry)
@@ -292,25 +288,8 @@ class ProteinDatabase:
         with open(path, file_open_mode, encoding="utf-8") as file:
             profasta.io.write_fasta(file, fasta_records, line_width)
 
-    def get(self, identifier: str, default: Any = None) -> DatabaseEntry | Any:
-        """Get a protein entry by its identifier or return a default value."""
-        return self._db.get(identifier, default)
-
-    def keys(self) -> KeysView[str]:
-        return self._db.keys()
-
-    def values(self) -> ValuesView[AbstractDatabaseEntry]:
-        return self._db.values()
-
-    def items(self) -> ItemsView[str, AbstractDatabaseEntry]:
-        return self._db.items()
-
-    def __bool__(self) -> bool:
-        """Return True if the database contains any entries."""
-        return bool(self._db)
-
-    def __getitem__(self, identifier) -> AbstractDatabaseEntry:
-        return self._db[identifier]
+    def __getitem__(self, key: str) -> AbstractDatabaseEntry:
+        return self._db[key]
 
     def __contains__(self, identifier) -> bool:
         return identifier in self._db

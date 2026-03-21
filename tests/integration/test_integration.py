@@ -58,9 +58,7 @@ def test_protein_database_read_write_fasta_roundtrip(tmp_path):
     db2 = profasta.ProteinDatabase()
     db2.add_fasta(temp_fasta_path, header_parser="default")
 
-    for identifier in db:
-        assert db[identifier].header == db2[identifier].header
-        assert db[identifier].sequence == db2[identifier].sequence
+    assert db == db2
 
 
 def test_protein_database_write_fasta_in_append_mode(tmp_path):
