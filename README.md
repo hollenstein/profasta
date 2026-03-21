@@ -168,13 +168,13 @@ db.add_fasta("additional.fasta", header_parser="uniprot")
 # Write the forward entries, then append decoy entries with reversed sequences
 output_path = "combined_with_decoys.fasta"
 db.write_fasta(output_path, header_writer="default")
-profasta.decoy.write_decoy_fasta(db, output_path, append=True)
+profasta.write_decoy_fasta(db, output_path, append=True)
 ```
 
 Decoy headers are automatically prefixed with `rev_`. A custom prefix can be set via the `decoy_tag` argument:
 
 ```python
-profasta.decoy.write_decoy_fasta(db, output_path, append=True, decoy_tag="decoy_")
+profasta.write_decoy_fasta(db, output_path, append=True, decoy_tag="decoy_")
 ```
 
 ## Contributors
